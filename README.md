@@ -470,13 +470,16 @@ and set levels
       attachXLoggerUi();
     }
 
+Logging Exceptions
+------------------
 
-Caveats
---------
+If you which to log the Stack Trace of an exception you will need to pass stack trace instance to the logger.
 
-The Logger framework (as at M4), has a TODO about logging exceptions.  At the 
-moment _it doesn't_.  If you want to log exceptions, add the exception text to
-the log message.
+    try{
+       throw new FormatException( "this is a test");
+    }catch( e, st){
+       logger.warning( "Caught something", e, st);
+    }
 
 If you find any problems or errors, then please let me know.
 This was current as at r21823

@@ -1,13 +1,15 @@
 library logging_handlers_shared;
 
-import 'dart:convert';
+
 
 import 'package:logging/logging.dart';
 import 'package:intl/intl.dart';
+import 'package:stack_trace/stack_trace.dart';
 
 part 'src/shared/transformer.dart';
 part 'src/shared/string_transformer.dart';
 part 'src/shared/map_transformer.dart';
+
 
 var _stringTransformer = new StringTransformer();
 

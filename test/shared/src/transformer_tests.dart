@@ -27,14 +27,26 @@ runTransformerTests() {
 }
 
 
+
+
 class TestFormatterImpl extends LogRecordTransformer { }
+/**
+ *  Changed from a Mock, which didnt work...
+ */
+StackTrace createStackTrace(){
+  StackTrace st;
+  try{
+    throw new Exception( );
+  }catch( e, s){
+    return s;
+  }
+}
 
 class MockStackTrace extends StackTrace {
   String _stackText;
   MockStackTrace(this._stackText);
   toString() => _stackText;
 }
-
 var dateFormat = new DateFormat(StringTransformer.DEFAULT_DATE_TIME_FORMAT);
 
 runStringTransformerTests() {
@@ -48,22 +60,32 @@ runStringTransformerTests() {
         equals("${dateFormat.format(logRecord.time)}\tmy.logger\t[INFO]:\tI am a message"));
   });
   
-  test("defaults with exception", () {
+
+  test("defaults with exception and stackTrace", () {
+
+  
     var message = "I am a message";
     var loggerName = "my.logger";
     var exception = new Exception("I am an exception");
+    var stackTrace = createStackTrace();
+    
     var logRecord = new LogRecord(Level.INFO, 
         message, 
         loggerName, 
         exception,
-        new MockStackTrace("Exception text"));
-    
+        stackTrace);
+            
     var impl = new StringTransformer();
     expect(impl.transform(logRecord),
-        equals("${dateFormat.format(logRecord.time)}\tmy.logger\t[INFO]:\tI am a message\nException: I am an exception\nException: I am an exception"));
+        equals("""${dateFormat.format(logRecord.time)}\tmy.logger\t[INFO]:\tI am a message
+Exception Type: ${exception.runtimeType}
+Exception: I am an exception\nStackTrace:
+${Trace.format(stackTrace)}"""));
   });  
   
   test("custom formats", () {
+    
+    
     var message = "I am a message";
     var loggerName = "my.logger";
     var exception = new Exception("I am an exception");
@@ -74,7 +96,7 @@ runStringTransformerTests() {
         message, 
         loggerName, 
         exception,
-        new MockStackTrace("Exception text"));
+        null);
     
     var impl = new StringTransformer(messageFormat: "%s %t %n[%p]: %m", exceptionFormatSuffix: " %e %x", timestampFormat: "dd-MM-yyyy");
     // Note - this prints the exception message with a sequence number.
@@ -83,10 +105,13 @@ runStringTransformerTests() {
     // output "contains" the expected string without the sequence number prefix 
     expect(impl.transform(logRecordNoException),
         contains(" my.logger[FINEST]: I am a message"));
-    expect(impl.transform(logRecordWithException),
-        contains(" my.logger[FINEST]: I am a message Exception: I am an exception Exception: I am an exception"));
     
-  });  
+    
+    expect(impl.transform(logRecordWithException),
+        contains(" my.logger[FINEST]: I am a message Exception: I am an exception _ExceptionImplementation"));
+    
+  });
+  
 }
 
 runMapTransformerTests() {
@@ -118,7 +143,8 @@ runMapTransformerTests() {
         message, 
         loggerName, 
         exception,
-        new MockStackTrace("Exception text"));
+        createStackTrace());
+        //new MockStackTrace("Exception text"));
     
     var impl = new MapTransformer();
     var map = impl.transform(logRecord); // convert the logRecord to a map    

@@ -1,7 +1,7 @@
 import 'dart:html';
 import 'package:logging_handlers/browser_logging_handlers.dart';
 import 'package:logging/logging.dart';
-import 'dart:async'; 
+
 
 main() {
    hierarchicalLoggingEnabled = true;

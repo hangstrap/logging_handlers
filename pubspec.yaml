@@ -11,4 +11,4 @@ dependencies:
 dev_dependencies:
   browser: '>=0.8.10+3'
   polymer: '>=0.8.10'
-  unittest: '>=0.8.10+3'
+  unittest: 0.10.1+2

@@ -20,17 +20,19 @@ class StringTransformer implements LogRecordTransformer {
   
   /// Outputs the logger sequence
   static const SEQ = "%s"; // logger sequence
-  static const EXCEPTION = "%x"; // logger exception
+  static const EXCEPTION = "%x"; // logger exception type
   static const EXCEPTION_TEXT = "%e"; // logger exception message
+  static const STACK_DUMP = "%d";   //logger StackDump 
   static const TAB = "\t";
   static const NEW_LINE = "\n";
   
   /// Default format for a log message that does not contain an exception.
   static const DEFAULT_MESSAGE_FORMAT = "%t\t%n\t[%p]:\t%m";
   
-  /// Default format for a log message the contains an exception
-  /// This is appended onto the message format if there is an exception
-  static const DEFAULT_EXCEPTION_FORMAT = "\n%e\n%x";
+  /// Default format for a log message if it contains an exception
+  /// This is appended onto the message format - 
+  /// first the class name of the exception, then the message, and the StackTrace (if present)
+  static const DEFAULT_EXCEPTION_FORMAT = "\nException Type: ${EXCEPTION}\n${EXCEPTION_TEXT}\nStackTrace:\n${STACK_DUMP}";
   
   /// Default date time format for log messages
   static const DEFAULT_DATE_TIME_FORMAT = "yyyy.mm.dd HH:mm:ss.SSS";
@@ -48,7 +50,7 @@ class StringTransformer implements LogRecordTransformer {
   DateFormat dateFormat;
   
   /// Contains the regexp pattern
-  static final _regexp = new RegExp("($LEVEL|$MESSAGE|$NAME|$TIME|$SEQ|$EXCEPTION|$EXCEPTION_TEXT)");
+  static final _regexp = new RegExp("($LEVEL|$MESSAGE|$NAME|$TIME|$SEQ|$EXCEPTION|$EXCEPTION_TEXT|$STACK_DUMP)");
   
   StringTransformer({
       String this.messageFormat : StringTransformer.DEFAULT_MESSAGE_FORMAT,
@@ -92,9 +94,13 @@ class StringTransformer implements LogRecordTransformer {
           case SEQ:
             return logRecord.sequenceNumber.toString();
           case EXCEPTION:
+            if (logRecord.error != null) return "${logRecord.error.runtimeType}";
+            break;
           case EXCEPTION_TEXT:
             if (logRecord.error != null) return logRecord.error.toString();
             break;
+          case STACK_DUMP:
+            if( logRecord.stackTrace != null) return "${Trace.format( logRecord.stackTrace)}";
         }
       }
 
